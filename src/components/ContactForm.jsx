@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import { Button, Col, Row } from "react-bootstrap";
 import { PatternFormat } from "react-number-format";
 import { db } from "../config/firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 
 const phoneRegExp = /^[(]?[0-9]{2}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{2}[ .-]?[0-9]{2}$/;
 
@@ -23,29 +23,53 @@ const schema = yup.object().shape({
   birthday: yup.string().required()
 });
 
-export default function ContactForm() {
+export default function ContactForm({ contact, edit, onEditChange }) {
   const inputPhoneRef = useRef();
   return (
     <Formik
       validationSchema={schema}
       onSubmit={async (values) => {
-        const docRef = collection(db, "contacts");
+        const docRef = edit
+          ? doc(db, "contacts", contact.id)
+          : collection(db, "contacts");
         const inputPhone = inputPhoneRef.current.value;
-        const { id } = await addDoc(docRef, {
-          ...values,
-          phoneNumber: inputPhone
-        });
-
-        id && window.location.reload();
-        console.log({ ...values, phoneNumber: inputPhone });
+        if (edit) {
+          await updateDoc(docRef, {
+            ...values,
+            phoneNumber: inputPhone
+          }).then(() => {
+            onEditChange();
+          });
+        } else {
+          const { id } = await addDoc(docRef, {
+            ...values,
+            phoneNumber: inputPhone
+          });
+          id && window.location.reload();
+        }
       }}
-      initialValues={{
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        birthday: ""
-      }}
+      enableReinitialize
+      initialValues={
+        edit
+          ? {
+              firstName: contact.firstName,
+              lastName: contact.lastName,
+              email: contact.email,
+              phoneNumber: contact.phoneNumber
+                .split(" ")
+                .slice(1)
+                .join("")
+                .replace(/[^0-9]/gi, ""),
+              birthday: contact.birthday
+            }
+          : {
+              firstName: "",
+              lastName: "",
+              email: "",
+              phoneNumber: "",
+              birthday: ""
+            }
+      }
     >
       {({
         handleSubmit,
@@ -165,9 +189,15 @@ export default function ContactForm() {
             </Form.Group>
           </Row>
 
-          <Button variant="primary" type="submit">
-            Add to contacts
-          </Button>
+          {edit ? (
+            <Button variant="primary" type="submit">
+              Update contact
+            </Button>
+          ) : (
+            <Button variant="primary" type="submit">
+              Add to contacts
+            </Button>
+          )}
         </Form>
       )}
     </Formik>

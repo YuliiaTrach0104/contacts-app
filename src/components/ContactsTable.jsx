@@ -1,24 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Table } from "react-bootstrap";
 import { TABLE_HEADERS } from "../constants/table";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../config/firebase";
 
-export default function ContactsTable() {
-  const [contactsData, setContactsData] = useState([]);
-
-  const fetchContacts = async () => {
-    await getDocs(collection(db, "contacts")).then((querySnapshot) => {
-      const newData = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id
-      }));
-      setContactsData(newData);
-    });
-  };
-  useEffect(() => {
-    fetchContacts();
-  }, []);
+export default function ContactsTable({ onSelect, contactsData }) {
   return (
     <div className="App-table">
       <h1>Contacts list</h1>
@@ -35,10 +19,10 @@ export default function ContactsTable() {
             !!contactsData.length &&
             contactsData.map(
               (
-                { firstName, lastName, email, phoneNumber, birthday },
+                { firstName, lastName, email, phoneNumber, birthday, id },
                 index
               ) => (
-                <tr key={index}>
+                <tr key={index} onClick={() => onSelect(id)}>
                   <td>{index + 1}</td>
                   <td>{firstName}</td>
                   <td>{lastName}</td>
