@@ -7,6 +7,13 @@
   color: black;
 }
 
+.App-pagination {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .App-table {
   text-align: center;
   margin: 60px 20px;

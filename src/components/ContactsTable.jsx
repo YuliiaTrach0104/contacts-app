@@ -2,7 +2,7 @@ import React from "react";
 import { Table } from "react-bootstrap";
 import { TABLE_HEADERS } from "../constants/table";
 
-export default function ContactsTable({ onSelect, contactsData }) {
+export default function ContactsTable({ onSelect, contactsData, page }) {
   return (
     <div className="App-table">
       <h1>Contacts list</h1>
@@ -23,7 +23,7 @@ export default function ContactsTable({ onSelect, contactsData }) {
                 index
               ) => (
                 <tr key={index} onClick={() => onSelect(id)}>
-                  <td>{index + 1}</td>
+                  <td>{index + 1 + 5 * (page - 1)}</td>
                   <td>{firstName}</td>
                   <td>{lastName}</td>
                   <td>{email}</td>
