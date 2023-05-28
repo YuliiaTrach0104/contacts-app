@@ -1,37 +1,53 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table } from "react-bootstrap";
+import { TABLE_HEADERS } from "../constants/table";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
 
 export default function ContactsTable() {
+  const [contactsData, setContactsData] = useState([]);
+
+  const fetchContacts = async () => {
+    await getDocs(collection(db, "contacts")).then((querySnapshot) => {
+      const newData = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+      setContactsData(newData);
+    });
+  };
+  useEffect(() => {
+    fetchContacts();
+  }, []);
   return (
     <div className="App-table">
       <h1>Contacts list</h1>
-      <Table striped>
+      <Table striped hover>
         <thead>
           <tr>
-            <th>#</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Username</th>
+            {TABLE_HEADERS.map((header, index) => (
+              <th key={index}>{header}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td colSpan={2}>Larry the Bird</td>
-            <td>@twitter</td>
-          </tr>
+          {contactsData &&
+            !!contactsData.length &&
+            contactsData.map(
+              (
+                { firstName, lastName, email, phoneNumber, birthday },
+                index
+              ) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{firstName}</td>
+                  <td>{lastName}</td>
+                  <td>{email}</td>
+                  <td>{phoneNumber}</td>
+                  <td>{birthday}</td>
+                </tr>
+              )
+            )}
         </tbody>
       </Table>
     </div>

@@ -8,5 +8,9 @@
 }
 
 .App-table {
+  text-align: center;
   margin: 60px 20px;
+}
+.App-table table tbody tr {
+  cursor: pointer;
 }
