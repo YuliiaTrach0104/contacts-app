@@ -18,6 +18,7 @@ import {
   startAt
 } from "firebase/firestore";
 import PaginationComponent from "./components/Pagination";
+import Filters from "./components/Filters";
 
 function App() {
   const [contactsData, setContactsData] = useState([]);
@@ -28,6 +29,9 @@ function App() {
 
   const [selectedContact, setSelectedContact] = useState({});
   const [isEdit, setIsEdit] = useState(false);
+
+  const [allYears, setAllYears] = useState();
+  const [filters, setFilters] = useState();
 
   useEffect(() => {
     fetchContacts();
@@ -54,6 +58,10 @@ function App() {
         ...doc.data(),
         id: doc.id
       }));
+      const years = [
+        ...new Set(newData.map(({ birthday }) => birthday.split("-")[0]))
+      ];
+      setAllYears(years);
       setAllContacts(newData);
       setContactsCount(newData.length);
     });
@@ -139,6 +147,10 @@ function App() {
     setIsEdit(false);
   };
 
+  const handleCheckFilters = (id) => {
+    setFilters(id);
+  };
+
   return (
     <div className="App">
       <ContactForm
@@ -146,11 +158,15 @@ function App() {
         onEditChange={handleEditState}
         edit={isEdit}
       />
-      <ContactsTable
-        onSelect={handleSelectContact}
-        contactsData={contactsData}
-        page={page}
-      />
+      <div className="App-table">
+        <h1>Contacts list</h1>
+        <Filters filters={allYears} />
+        <ContactsTable
+          onSelect={handleSelectContact}
+          contactsData={contactsData}
+          page={page}
+        />
+      </div>
       <div className="App-pagination">
         <PaginationComponent
           next={showNext}
